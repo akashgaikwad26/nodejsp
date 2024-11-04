@@ -30,7 +30,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Add CODECOV_TOKEN to your repository secrets
+          token: ${{ secrets.CODECOV_TOKEN }}  # Add CODECOV_TOKEN to your repository secret
           files: ./coverage/lcov.info
           flags: unittests
           name: codecov-coverage
