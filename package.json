@@ -7,7 +7,9 @@
     "test": "jest",
     "start": "nodemon index.js",
     "test:run": "node index.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:report": "eslint . -f json --output-file eslint-report.html"
+
   },
   "author": "",
   "license": "ISC",
