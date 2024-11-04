@@ -28,8 +28,15 @@ jobs:
         run: npm run lint
         continue-on-error: true  # Optional: allows workflow to continue even if linting fails
 
+
       - name: Generate ESLint report
         run: npm run lint -- --format json --output-file eslint-report.json
         continue-on-error: true  # Optional: allows workflow to continue even if linting fails
+
+      - name: Upload ESLint Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: eslint-report
+          path: eslint-report.json  # Path to the ESLint report file
 
 
