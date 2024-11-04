@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'  # Updated Node.js version
 
       - name: Install dependencies
         run: npm install
@@ -32,5 +32,23 @@ jobs:
         run: npm run lint -- --format json --output-file eslint-report.json
         continue-on-error: true  # Optional: allows workflow to continue even if linting fails
 
+      - name: Upload ESLint report
+        uses: actions/upload-artifact@v2
+        with:
+          name: eslint-report
+          path: eslint-report.json
 
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript  # Add other languages as needed, e.g., python, cpp
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
