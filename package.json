@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "start": "nodemon index.js",
     "test:run": "node index.js",
     "lint": "eslint .",
     "lint:report": "eslint . -f json --output-file eslint-report.html"
+    
 
   },
   "author": "",
