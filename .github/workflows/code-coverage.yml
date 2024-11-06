@@ -27,10 +27,11 @@ jobs:
       - name: Run tests with coverage
         run: npm test -- --passWithNoTests --coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+      - name: Upload Coverage report
+        uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Add CODECOV_TOKEN to your repository secret
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-coverage
+          name: jest-coverage-report
+          path: coverage/
+
+      - name: Clean up coverage directory
+        run: rm -rf coverage/
