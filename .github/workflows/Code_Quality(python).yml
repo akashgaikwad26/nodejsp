@@ -4,15 +4,18 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.py'
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.py'
 
 jobs:
   lint:
     name: Lint Python Codebase
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '.py')  # Run this job only if there are Python files
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
