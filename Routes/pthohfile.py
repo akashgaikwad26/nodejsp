@@ -1,2 +1,1 @@
-print("ajse")
-dd
+print("akash")
