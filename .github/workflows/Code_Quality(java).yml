@@ -1,0 +1,41 @@
+name: Code Quality (Java)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.java'  # Trigger only for changes in Java files
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.java'  # Trigger only for changes in Java files
+
+jobs:
+  lint:
+    name: Lint Java Codebase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'  # Specify the version of Java you are using (e.g., 17 or 11)
+
+      - name: Install Checkstyle
+        run: |
+          sudo apt-get install checkstyle  # Install Checkstyle for linting
+
+      - name: Run Checkstyle
+        run: |
+          checkstyle -c /google_checks.xml src/**/*.java > checkstyle-report.txt || true
+        continue-on-error: true  # Optional: allows workflow to continue even if linting fails
+
+      - name: Upload Checkstyle Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: checkstyle-report
+          path: checkstyle-report.txt
