@@ -1,17 +1,12 @@
-/* Cryptogram.c*/
-// A program is written to solve a cryptaritmetic problem
-// AB * C = AAA
-// A, B and C stand for differnt digits
-// A, B and C are all unequal
-
-# include<stdio.h>
-#include <assert.h>
+#include<stdio.h>
+#include<assert.h>
 
 void determineABC(int *a, int *b, int *c)
 {
-    int i = *a;
-    int j = *b;
-    int k = *c;
+    // int i = *a;
+    // int j = *b;
+    // int k = *c;  
+    int i=1,j,k;
     // int i = 1;
     // int j, k;
     int flag = 0;
@@ -44,32 +39,32 @@ void determineABC(int *a, int *b, int *c)
     }
 }
 
-void determineABCUsingFor()
-{
-        int flag = 0;
-        for (int i = 1; i <= 9 && !flag; i++)
-        {
-             for (int j = 1; j <= 9 && !flag; j++)
-             {
-                for (int k = 1; k <= 9 && !flag; k++)
-                {
-                    if ( i != j && j != k && k != i)
-                    {
-                        if ( (10 * i + j)*k  == 111 * i ) 
-                        {
-                            printf("Found one solution: A = %d, B = %d, C = %d\n", i, j, k);
-                            flag = 1;
-                        }
+// void determineABCUsingFor()
+// {
+//         int flag = 0;
+//         for (int i = 1; i <= 9 && !flag; i++)
+//         {
+//              for (int j = 1; j <= 9 && !flag; j++)
+//              {
+//                 for (int k = 1; k <= 9 && !flag; k++)
+//                 {
+//                     if ( i != j && j != k && k != i)
+//                     {
+//                         if ( (10 * i + j)*k  == 111 * i ) 
+//                         {
+//                             printf("Found one solution: A = %d, B = %d, C = %d\n", i, j, k);
+//                             flag = 1;
+//                         }
 
-                    }
+//                     }
 
-                }
+//                 }
 
-             }
+//              }
 
-        }
+//         }
 
-}
+// }
 
 
 int main(int argc, char const *argv[])
@@ -82,6 +77,8 @@ int main(int argc, char const *argv[])
     assert(B == 7);
     assert(C == 9);
    // testfunction();
-    //determineABCUsingFor();
     return 0;
+    
+    
+
 }
