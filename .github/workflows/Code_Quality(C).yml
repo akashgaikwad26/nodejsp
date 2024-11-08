@@ -25,6 +25,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cppcheck xsltproc
 
+      - name: Download Cppcheck HTML XSL stylesheet
+        run: |
+          wget https://raw.githubusercontent.com/danmar/cppcheck/main/htmlreport/cppcheck-html.xsl -O cppcheck-html.xsl
+
       - name: Run Cppcheck and Generate XML Report
         run: |
           cppcheck --enable=all --inconclusive --xml . 2> cppcheck-report.xml || true
@@ -32,7 +36,7 @@ jobs:
 
       - name: Convert XML to HTML
         run: |
-          xsltproc /usr/share/cppcheck/htmlreport/cppcheck-html.xsl cppcheck-report.xml > cppcheck-report.html
+          xsltproc cppcheck-html.xsl cppcheck-report.xml > cppcheck-report.html
 
       - name: Upload Cppcheck HTML Report
         uses: actions/upload-artifact@v3
