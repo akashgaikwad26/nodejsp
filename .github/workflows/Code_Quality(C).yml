@@ -1,4 +1,4 @@
-name: Code Quality (C)
+name: Code Quality (C) Report
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   lint:
-    name: Lint C Codebase
+    name: Analyze C Codebase with Cppcheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -32,13 +32,13 @@ jobs:
       - name: Run Cppcheck and Generate XML Report
         run: |
           cppcheck --enable=all --inconclusive --xml . 2> cppcheck-report.xml || true
-        continue-on-error: true  # Allows workflow to continue even if linting finds issues
+        continue-on-error: true
 
-      - name: Convert XML to HTML
+      - name: Convert XML to HTML Report
         run: |
           xsltproc cppcheck-html.xsl cppcheck-report.xml > cppcheck-report.html
 
-      - name: Upload Cppcheck HTML Report
+      - name: Upload Cppcheck HTML Report to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: cppcheck-html-report
