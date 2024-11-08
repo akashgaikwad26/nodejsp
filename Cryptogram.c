@@ -1,11 +1,12 @@
 #include<stdio.h>
 #include<assert.h>
 
+
 void determineABC(int *a, int *b, int *c)
 {
     // int i = *a;
     // int j = *b;
-    // int k = *c;  
+    int k = *c;  
     int i=1,j,k;
     // int i = 1;
     // int j, k;
