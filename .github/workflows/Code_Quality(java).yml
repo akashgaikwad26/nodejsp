@@ -33,10 +33,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Run Maven with Checkstyle, PMD, and SpotBugs, specifying the correct working directory
+      # Run Maven with Checkstyle, PMD, and SpotBugs
       - name: Run Maven Checkstyle, PMD, and SpotBugs
         run: mvn verify checkstyle:check pmd:check spotbugs:check -DskipTests
-        working-directory: ./nodejsp  # Update this path to match the location of your pom.xml file
+        working-directory: nodejsp  # Use only `nodejsp` without `./` if `pom.xml` is located in `nodejsp`
 
       # Upload HTML reports as artifacts
       - name: Upload Checkstyle, PMD, and SpotBugs HTML reports
