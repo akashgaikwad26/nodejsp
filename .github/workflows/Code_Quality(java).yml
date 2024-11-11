@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.java'  # Trigger only on Java file changes
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.java'  # Trigger only on Java file changes in pull requests
 
 jobs:
   quality-check:
@@ -31,19 +35,22 @@ jobs:
 
       - name: Run Checkstyle
         run: mvn checkstyle:check
+        working-directory: ./nodejsp  # Adjust if pom.xml is in a subdirectory
 
       - name: Run PMD
         run: mvn pmd:check
+        working-directory: ./nodejsp
 
       - name: Run SpotBugs
         run: mvn spotbugs:spotbugs
+        working-directory: ./nodejsp
 
-      # Upload reports if you have configured these plugins to generate HTML reports
       - name: Upload Code Quality Reports
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: code-quality-reports
           path: |
-            target/site/checkstyle.html
-            target/site/pmd.html
-            target/site/spotbugs.html
+            nodejsp/target/site/checkstyle.html
+            nodejsp/target/site/pmd.html
+            nodejsp/target/site/spotbugs.html
