@@ -5,16 +5,20 @@ on:
     branches:
       - main
     paths:
-      - '**/*.java'  # Trigger only on Java file changes
+      - '**/*.java'
   pull_request:
     branches:
       - main
     paths:
-      - '**/*.java'  # Trigger only on Java file changes in pull requests
+      - '**/*.java'
 
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nodejsp  # Set globally if `pom.xml` is in `nodejsp`
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -35,15 +39,12 @@ jobs:
 
       - name: Run Checkstyle
         run: mvn checkstyle:check
-        working-directory: ./nodejsp  # Adjust if pom.xml is in a subdirectory
 
       - name: Run PMD
         run: mvn pmd:check
-        working-directory: ./nodejsp
 
       - name: Run SpotBugs
         run: mvn spotbugs:spotbugs
-        working-directory: ./nodejsp
 
       - name: Upload Code Quality Reports
         if: always()
@@ -51,6 +52,6 @@ jobs:
         with:
           name: code-quality-reports
           path: |
-            nodejsp/target/site/checkstyle.html
-            nodejsp/target/site/pmd.html
-            nodejsp/target/site/spotbugs.html
+            target/site/checkstyle.html
+            target/site/pmd.html
+            target/site/spotbugs.html
