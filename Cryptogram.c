@@ -7,7 +7,7 @@ void determineABC(int *a, int *b, int *c)
     // int i = *a;
     // int j = *b;
     int k = *c;  
-    int i=1,j,k;
+    int i=1,j;
     // int i = 1;
     // int j, k;
     int flag = 0;
