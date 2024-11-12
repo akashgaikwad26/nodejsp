@@ -25,20 +25,25 @@ jobs:
           sudo apt update
           sudo apt install -y lcov gcovr gcc
 
-      - name: Build with coverage flags
+      - name: Compile all .c files with coverage flags
         run: |
-          # Compile the source and test files with coverage flags
-          gcc -fprofile-arcs -ftest-coverage -c math_operations.c
-          gcc -fprofile-arcs -ftest-coverage -c test_math_operations.c
-          gcc -o test_math_operations math_operations.o test_math_operations.o
+          # Compile all .c files in the root directory with coverage flags
+          for file in $(find . -maxdepth 1 -name "*.c"); do
+            gcc -fprofile-arcs -ftest-coverage -c "$file"
+          done
+
+          # Link all .o files to create the test executable
+          gcc -fprofile-arcs -ftest-coverage -o test_executable *.o
 
       - name: Run tests
-        run: ./test_math_operations
+        run: ./test_executable
 
-      - name: Generate gcov coverage report
+      - name: Generate gcov coverage report for all .c files
         run: |
-          # Generate .gcov files for each .c file
-          gcov math_operations.c
+          # Generate .gcov files for each .c file in the root directory
+          for file in $(find . -maxdepth 1 -name "*.c"); do
+            gcov "$file"
+          done
 
       - name: Upload Coverage report
         uses: actions/upload-artifact@v3
@@ -47,4 +52,4 @@ jobs:
           path: ./*.gcov
 
       - name: Clean up coverage files
-        run: rm -rf *.gcov *.gcda *.gcno
+        run: rm -rf *.gcov *.gcda *.gcno *.o test_executable
