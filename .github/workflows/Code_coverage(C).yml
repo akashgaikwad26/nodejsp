@@ -1,0 +1,50 @@
+name: Code Coverage for C Code
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.c'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.c'
+
+jobs:
+  test:
+    name: Run Tests and Upload Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y lcov gcovr gcc
+
+      - name: Build with coverage flags
+        run: |
+          # Compile the source and test files with coverage flags
+          gcc -fprofile-arcs -ftest-coverage -c math_operations.c
+          gcc -fprofile-arcs -ftest-coverage -c test_math_operations.c
+          gcc -o test_math_operations math_operations.o test_math_operations.o
+
+      - name: Run tests
+        run: ./test_math_operations
+
+      - name: Generate gcov coverage report
+        run: |
+          # Generate .gcov files for each .c file
+          gcov math_operations.c
+
+      - name: Upload Coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: gcov-coverage-report
+          path: ./*.gcov
+
+      - name: Clean up coverage files
+        run: rm -rf *.gcov *.gcda *.gcno
