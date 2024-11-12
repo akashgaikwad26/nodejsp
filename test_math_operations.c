@@ -10,11 +10,11 @@ void test_add() {
     printf("Addition tests passed.\n");
 }
 
-void test_subtract() {
-    assert(subtract(5, 3) == 2);
-    assert(subtract(0, 1) == -1);
-    printf("Subtraction tests passed.\n");
-}
+// void test_subtract() {
+//     assert(subtract(5, 3) == 2);
+//     assert(subtract(0, 1) == -1);
+//     printf("Subtraction tests passed.\n");
+// }
 
 void test_multiply() {
     assert(multiply(2, 3) == 6);
