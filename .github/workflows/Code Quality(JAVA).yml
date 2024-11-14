@@ -1,4 +1,4 @@
-name: Java Code Quality Report
+name: Java Code Quality Report(#)
 
 on:
   push:
@@ -38,13 +38,15 @@ jobs:
 
       - name: Install PMD
         run: |
+          # Download and extract PMD
           wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.44.0/pmd-bin-6.44.0.zip -O pmd.zip
           unzip pmd.zip -d pmd
           rm pmd.zip
 
       - name: Run PMD
         run: |
-          ./pmd/bin/pmd -d . -R java-basic,java-design -f text -r pmd.txt
+          # Ensure we're in the directory where PMD was extracted, then run PMD
+          ./pmd-bin-6.44.0/bin/pmd -d . -R java-basic,java-design -f text -r pmd.txt
 
       - name: Install SpotBugs
         run: |
