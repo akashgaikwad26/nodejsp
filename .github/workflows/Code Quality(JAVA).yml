@@ -1,4 +1,4 @@
-name: Java Code Quality Report(#)
+name: Java Code Quality Report
 
 on:
   push:
@@ -43,10 +43,15 @@ jobs:
           unzip pmd.zip -d pmd
           rm pmd.zip
 
+      - name: List PMD directory contents (debug step)
+        run: |
+          # List the contents of the PMD directory to verify extraction
+          ls -R pmd
+
       - name: Run PMD
         run: |
-          # Ensure we're in the directory where PMD was extracted, then run PMD
-          ./pmd-bin-6.44.0/bin/pmd -d . -R java-basic,java-design -f text -r pmd.txt
+          # Run PMD from the correct path
+          ./pmd/pmd-bin-6.44.0/bin/pmd -d . -R java-basic,java-design -f text -r pmd.txt
 
       - name: Install SpotBugs
         run: |
