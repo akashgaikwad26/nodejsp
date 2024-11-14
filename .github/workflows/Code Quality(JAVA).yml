@@ -54,14 +54,20 @@ jobs:
 
       - name: Calculate Checkstyle Quality Percentage
         run: |
-          total_lines=$(wc -l < checkstyle.txt)
-          total_violations=$(grep -c 'Line' checkstyle.txt)
-          if [ "$total_lines" -gt 0 ]; then
-            checkstyle_quality=$(echo "scale=2; (1 - ($total_violations / $total_lines)) * 100" | bc)
+          # Ensure checkstyle.txt exists and is not empty before proceeding
+          if [ -s checkstyle.txt ]; then
+            total_lines=$(wc -l < checkstyle.txt)
+            total_violations=$(grep -c 'Line' checkstyle.txt)
+            if [ "$total_lines" -gt 0 ]; then
+              checkstyle_quality=$(echo "scale=2; (1 - ($total_violations / $total_lines)) * 100" | bc)
+            else
+              checkstyle_quality=100  # If no lines, assume 100% quality
+            fi
           else
-            checkstyle_quality=0
+            checkstyle_quality="N/A"  # Mark as not available if checkstyle.txt is missing or empty
           fi
           echo "Checkstyle Quality Percentage: $checkstyle_quality%" >> code-quality-report.html
+
 
       - name: Consolidate Reports into a Single File
         run: |
