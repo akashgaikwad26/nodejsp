@@ -26,10 +26,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Install Checkstyle
+       - name: Install Checkstyle
         run: |
           wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.2/checkstyle-10.2-all.jar -O checkstyle.jar
-          wget https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml -O checkstyle-config.xml
+          wget https://raw.githubusercontent.com/checkstyle/checkstyle/10.2/src/main/resources/google_checks.xml -O checkstyle-config.xml
 
       - name: Run Checkstyle
         run: |
