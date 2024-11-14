@@ -1,0 +1,85 @@
+name: Java Code Quality Report
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.java'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.java'
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Install Checkstyle
+        run: |
+          # Download Checkstyle 8.45.1, compatible with `SuppressWithNearbyTextFilter`
+          wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.45.1/checkstyle-8.45.1-all.jar -O checkstyle.jar
+          
+          # Download the Google Checkstyle configuration for Checkstyle 8.45.1
+          wget https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-8.45.1/src/main/resources/google_checks.xml -O checkstyle-config.xml
+
+      - name: Run Checkstyle
+        run: |
+          # Run Checkstyle on all Java files and output the result to checkstyle.txt
+          java -jar checkstyle.jar -c checkstyle-config.xml -f plain -o checkstyle.txt $(find . -name "*.java")
+
+      - name: Install PMD
+        run: |
+          # Download and extract PMD
+          wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.44.0/pmd-bin-6.44.0.zip -O pmd.zip
+          unzip pmd.zip -d pmd
+          rm pmd.zip
+
+      - name: Run PMD
+        run: |
+          # Run PMD and save output to pmd.txt
+          ./pmd/bin/run.sh pmd -d . -R java-basic,java-design -f text > pmd.txt
+
+      - name: Install SpotBugs
+        run: |
+          # Download and extract SpotBugs
+          wget https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs/4.5.0/spotbugs-4.5.0.tgz -O spotbugs.tgz
+          tar -xzf spotbugs.tgz
+          rm spotbugs.tgz
+
+      - name: Run SpotBugs
+        run: |
+          # Compile Java files and run SpotBugs
+          find . -name "*.class" -delete # Remove any old .class files
+          javac $(find . -name "*.java") # Compile Java files to .class
+          ./spotbugs-4.5.0/bin/spotbugs -textui -output spotbugs.txt $(find . -name "*.class")
+
+      - name: Consolidate Reports into a Single File
+        run: |
+          # Create a single HTML file for all reports
+          echo "<html><body><h1>Java Code Quality Report</h1>" > code-quality-report.html
+          echo "<h2>Checkstyle Report</h2><pre>" >> code-quality-report.html
+          cat checkstyle.txt >> code-quality-report.html
+          echo "</pre><h2>PMD Report</h2><pre>" >> code-quality-report.html
+          cat pmd.txt >> code-quality-report.html
+          echo "</pre><h2>SpotBugs Report</h2><pre>" >> code-quality-report.html
+          cat spotbugs.txt >> code-quality-report.html
+          echo "</pre></body></html>" >> code-quality-report.html
+
+      - name: Upload Consolidated Code Quality Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-quality-report
+          path: code-quality-report.html
