@@ -52,21 +52,42 @@ jobs:
         run: |
           ./spotbugs-4.5.0/bin/spotbugs -textui -output spotbugs.txt $(find . -name "*.class") || echo "SpotBugs encountered errors." >> spotbugs.txt
 
-      - name: Calculate Checkstyle Quality Percentage
+      - name: Calculate Code Quality Percentage
+        id: quality
         run: |
-          # Ensure checkstyle.txt exists and is not empty before proceeding
-          if [ -s checkstyle.txt ]; then
-            total_lines=$(wc -l < checkstyle.txt)
-            total_violations=$(grep -c 'Line' checkstyle.txt)
-            if [ "$total_lines" -gt 0 ]; then
-              checkstyle_quality=$(echo "scale=2; (1 - ($total_violations / $total_lines)) * 100" | bc)
-            else
-              checkstyle_quality=100  # If no lines, assume 100% quality
-            fi
+          # Count Checkstyle violations
+          total_checkstyle_lines=$(wc -l < checkstyle.txt || echo 0)
+          total_checkstyle_violations=$(grep -c '^[0-9]' checkstyle.txt || echo 0)  # Count lines with line numbers as violations
+
+          # Calculate Checkstyle quality percentage
+          if [ "$total_checkstyle_lines" -gt 0 ]; then
+            checkstyle_quality=$(echo "scale=2; (1 - ($total_checkstyle_violations / $total_checkstyle_lines)) * 100" | bc)
           else
-            checkstyle_quality="N/A"  # Mark as not available if checkstyle.txt is missing or empty
+            checkstyle_quality=100
           fi
-          echo "Checkstyle Quality Percentage: $checkstyle_quality%" >> code-quality-report.html
+
+          # Count SpotBugs violations
+          total_spotbugs_violations=$(grep -c 'BugInstance' spotbugs.txt || echo 0)
+
+          # Assuming the total lines as a fixed number for simplicity (can be customized)
+          total_code_lines=$(find . -name "*.java" -exec wc -l {} + | awk '{sum += $1} END {print sum}')
+
+          # Calculate an approximate overall quality percentage based on violations
+          total_violations=$(($total_checkstyle_violations + $total_spotbugs_violations))
+          if [ "$total_code_lines" -gt 0 ]; then
+            overall_quality=$(echo "scale=2; (1 - ($total_violations / $total_code_lines)) * 100" | bc)
+          else
+            overall_quality=100
+          fi
+
+          echo "Checkstyle Quality Percentage: $checkstyle_quality"
+          echo "SpotBugs Violations Count: $total_spotbugs_violations"
+          echo "Overall Code Quality Percentage: $overall_quality"
+
+          # Save to GitHub Actions outputs
+          echo "::set-output name=checkstyle_quality::$checkstyle_quality"
+          echo "::set-output name=overall_quality::$overall_quality"
+
 
 
       - name: Consolidate Reports into a Single File
