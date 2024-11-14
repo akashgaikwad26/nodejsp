@@ -53,8 +53,8 @@ jobs:
 
       - name: Run PMD
         run: |
-          # Now run PMD using the correct shell script
-          ./pmd/pmd-bin-6.44.0/bin/run.sh -d . -R java-basic,java-design -f text -r pmd.txt
+          # Run PMD using the correct shell script with proper arguments
+          ./pmd/pmd-bin-6.44.0/bin/run.sh pmd -d . -R java-basic,java-design -f text -r pmd.txt
 
       - name: Install SpotBugs
         run: |
