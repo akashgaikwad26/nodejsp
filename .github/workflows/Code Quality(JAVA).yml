@@ -42,6 +42,9 @@ jobs:
           tar -xzf spotbugs.tgz
           rm spotbugs.tgz
 
+      - name: Make SpotBugs executable
+        run: chmod +x ./spotbugs-4.5.0/bin/spotbugs  # Ensure the SpotBugs binary is executable
+
       - name: Run SpotBugs
         run: |
           find . -name "*.class" -delete
@@ -56,24 +59,6 @@ jobs:
           echo "</pre><h2>SpotBugs Report</h2><pre>" >> code-quality-report.html
           cat spotbugs.txt >> code-quality-report.html
           echo "</pre></body></html>" >> code-quality-report.html
-
-      - name: Calculate Checkstyle Code Quality Percentage
-        run: |
-          # Check if checkstyle.txt exists and is not empty
-          if [ -s checkstyle.txt ]; then
-            total_lines=$(wc -l < checkstyle.txt)  # Get the total number of lines in the Checkstyle report
-            total_violations=$(grep -c 'Line' checkstyle.txt)  # Count the number of violations
-            if [ "$total_lines" -gt 0 ]; then
-              checkstyle_quality=$(echo "scale=2; (1 - ($total_violations / $total_lines)) * 100" | bc)
-              echo "Checkstyle Quality Percentage: $checkstyle_quality"
-            else
-              echo "Checkstyle report is empty. No violations found."
-              checkstyle_quality=100  # If no violations, consider it 100% quality
-            fi
-          else
-            echo "Checkstyle report file does not exist or is empty."
-            checkstyle_quality=100  # If the file doesn't exist or is empty, consider it 100% quality
-          fi
 
       - name: Upload Consolidated Code Quality Report
         if: always()
