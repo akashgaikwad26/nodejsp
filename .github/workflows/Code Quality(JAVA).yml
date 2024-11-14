@@ -44,6 +44,9 @@ jobs:
           tar -xzf spotbugs.tgz
           rm spotbugs.tgz
 
+      - name: Make SpotBugs executable
+        run: chmod +x ./spotbugs-4.5.0/bin/spotbugs
+
       - name: Run SpotBugs
         run: |
           find . -name "*.class" -delete
