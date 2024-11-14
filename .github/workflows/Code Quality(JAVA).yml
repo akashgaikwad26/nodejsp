@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - '**/*.java'
+  workflow_dispatch:   # Enables manual run from the Actions tab
 
 jobs:
   quality-check:
