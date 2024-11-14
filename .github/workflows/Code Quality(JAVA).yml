@@ -48,10 +48,13 @@ jobs:
           # List the contents of the PMD directory to verify extraction
           ls -R pmd
 
+      - name: Make run.sh executable
+        run: chmod +x ./pmd/pmd-bin-6.44.0/bin/run.sh
+
       - name: Run PMD
         run: |
-          # Run PMD from the correct path
-          ./pmd/pmd-bin-6.44.0/bin/pmd -d . -R java-basic,java-design -f text -r pmd.txt
+          # Now run PMD using the correct shell script
+          ./pmd/pmd-bin-6.44.0/bin/run.sh -d . -R java-basic,java-design -f text -r pmd.txt
 
       - name: Install SpotBugs
         run: |
