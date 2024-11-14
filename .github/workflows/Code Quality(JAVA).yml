@@ -36,7 +36,29 @@ jobs:
         run: |
           java -jar checkstyle.jar -c checkstyle-config.xml -f plain -o checkstyle.txt $(find . -name "*.java")
 
-      # Removed PMD related steps
+      - name: Calculate Checkstyle Code Quality Percentage
+        run: |
+          total_lines=$(wc -l < checkstyle.txt)  # Get the total number of lines with issues in Checkstyle report
+          total_violations=$(grep -c 'Line' checkstyle.txt)  # Count the violations
+          checkstyle_quality=$(echo "scale=2; (1 - ($total_violations / $total_lines)) * 100" | bc)
+          echo "Checkstyle Quality Percentage: $checkstyle_quality"
+
+      - name: Install PMD
+        run: |
+          wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.44.0/pmd-bin-6.44.0.zip -O pmd.zip
+          unzip pmd.zip -d pmd
+          rm pmd.zip
+
+      - name: Run PMD
+        run: |
+          ./pmd/pmd-bin-6.44.0/bin/run.sh pmd -d . -R java-basic,java-design -f text -r pmd.txt
+
+      - name: Calculate PMD Code Quality Percentage
+        run: |
+          total_pmd_lines=$(wc -l < pmd.txt)  # Get the total lines with issues in PMD report
+          total_pmd_issues=$(grep -c 'Rule' pmd.txt)  # Count the number of issues
+          pmd_quality=$(echo "scale=2; (1 - ($total_pmd_issues / $total_pmd_lines)) * 100" | bc)
+          echo "PMD Quality Percentage: $pmd_quality"
 
       - name: Install SpotBugs
         run: |
@@ -53,14 +75,30 @@ jobs:
           javac $(find . -name "*.java")
           ./spotbugs-4.5.0/bin/spotbugs -textui -output spotbugs.txt $(find . -name "*.class")
 
+      - name: Calculate SpotBugs Code Quality Percentage
+        run: |
+          total_bug_lines=$(wc -l < spotbugs.txt)  # Get the total lines with issues in SpotBugs report
+          total_bug_issues=$(grep -c 'Bug' spotbugs.txt)  # Count the number of issues
+          spotbugs_quality=$(echo "scale=2; (1 - ($total_bug_issues / $total_bug_lines)) * 100" | bc)
+          echo "SpotBugs Quality Percentage: $spotbugs_quality"
+
+      - name: Calculate Overall Code Quality Percentage
+        run: |
+          # Calculate overall quality by averaging Checkstyle, PMD, and SpotBugs quality
+          overall_quality=$(echo "scale=2; ($checkstyle_quality + $pmd_quality + $spotbugs_quality) / 3" | bc)
+          echo "Overall Code Quality Percentage: $overall_quality%"
+
       - name: Consolidate Reports into a Single File
         run: |
           echo "<html><body><h1>Java Code Quality Report</h1>" > code-quality-report.html
           echo "<h2>Checkstyle Report</h2><pre>" >> code-quality-report.html
           cat checkstyle.txt >> code-quality-report.html
-          # Removed PMD Report
+          echo "</pre><h2>PMD Report</h2><pre>" >> code-quality-report.html
+          cat pmd.txt >> code-quality-report.html
           echo "</pre><h2>SpotBugs Report</h2><pre>" >> code-quality-report.html
           cat spotbugs.txt >> code-quality-report.html
+          echo "</pre><h2>Overall Code Quality</h2><pre>" >> code-quality-report.html
+          echo "Overall Code Quality Percentage: $overall_quality%" >> code-quality-report.html
           echo "</pre></body></html>" >> code-quality-report.html
 
       - name: Upload Consolidated Code Quality Report
