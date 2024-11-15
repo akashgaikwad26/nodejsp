@@ -8,6 +8,8 @@ on:
     paths:
       - '**/*.js' # Trigger only on .js file changes
 
+  workflow_dispatch:
+
 jobs:
   lint:
     name: Run ESLint and Add Quality Percentage
