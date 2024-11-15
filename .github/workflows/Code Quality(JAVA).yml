@@ -34,22 +34,23 @@ jobs:
 
       - name: Run Checkstyle
         run: |
-          java -jar checkstyle.jar -c checkstyle-config.xml -f plain -o checkstyle.txt $(find . -name "*.java")
+          java -jar checkstyle.jar -c checkstyle-config.xml -f plain -o checkstyle.txt $(find . -name "*.java") || echo "Checkstyle encountered errors." >> checkstyle.txt
 
       - name: Install SpotBugs
         run: |
           wget https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs/4.5.0/spotbugs-4.5.0.tgz -O spotbugs.tgz
           tar -xzf spotbugs.tgz
+          chmod +x ./spotbugs-4.5.0/bin/spotbugs
           rm spotbugs.tgz
 
-      - name: Make SpotBugs executable
-        run: chmod +x ./spotbugs-4.5.0/bin/spotbugs  # Ensure the SpotBugs binary is executable
+      - name: Compile Java Files
+        run: |
+          find . -name "*.class" -delete
+          javac $(find . -name "*.java") || echo "Compilation errors occurred." >> compilation_errors.txt
 
       - name: Run SpotBugs
         run: |
-          find . -name "*.class" -delete
-          javac $(find . -name "*.java")
-          ./spotbugs-4.5.0/bin/spotbugs -textui -output spotbugs.txt $(find . -name "*.class")
+          ./spotbugs-4.5.0/bin/spotbugs -textui -output spotbugs.txt $(find . -name "*.class") || echo "SpotBugs encountered errors." >> spotbugs.txt
 
       - name: Calculate Code Quality Percentage
         id: quality
@@ -87,16 +88,30 @@ jobs:
           echo "::set-output name=checkstyle_quality::$checkstyle_quality"
           echo "::set-output name=overall_quality::$overall_quality"
 
+
+
       - name: Consolidate Reports into a Single File
         run: |
           echo "<html><body><h1>Java Code Quality Report</h1>" > code-quality-report.html
-          echo "<h2>Checkstyle Quality Percentage</h2><p>${{ steps.quality.outputs.checkstyle_quality }}%</p>" >> code-quality-report.html
-          echo "<h2>Overall Code Quality Percentage</h2><p>${{ steps.quality.outputs.overall_quality }}%</p>" >> code-quality-report.html
           echo "<h2>Checkstyle Report</h2><pre>" >> code-quality-report.html
           cat checkstyle.txt >> code-quality-report.html
+          
+          echo "</pre><h2>Compilation Errors</h2><pre>" >> code-quality-report.html
+          if [ -f compilation_errors.txt ]; then
+            cat compilation_errors.txt >> code-quality-report.html
+          else
+            echo "No compilation errors." >> code-quality-report.html
+          fi
+
           echo "</pre><h2>SpotBugs Report</h2><pre>" >> code-quality-report.html
-          cat spotbugs.txt >> code-quality-report.html
-          echo "</pre></body></html>" >> code-quality-report.html
+          if [ -f spotbugs.txt ]; then
+            cat spotbugs.txt >> code-quality-report.html
+          else
+            echo "No SpotBugs issues detected." >> code-quality-report.html
+          fi
+          
+          echo "</pre><h2>Checkstyle Quality Percentage</h2><p>Checkstyle Quality: $checkstyle_quality%</p>" >> code-quality-report.html
+          echo "</body></html>" >> code-quality-report.html
 
       - name: Upload Consolidated Code Quality Report
         if: always()
