@@ -1,4 +1,4 @@
-name: Javascript Code Quality Report
+name: ESLint Code Quality Report
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: Run ESLint and Calculate Code Quality
+    name: Run ESLint and Add Quality Percentage
     runs-on: ubuntu-latest
 
     steps:
@@ -31,32 +31,38 @@ jobs:
         npx eslint '**/*.js' --format json > eslint-report.json
         echo "eslint_report=$(cat eslint-report.json)" >> $GITHUB_ENV
 
-    - name: Calculate Code Quality Percentage
+    - name: Calculate and Add Code Quality Percentage
       id: quality
       run: |
+        # Read the ESLint report
+        eslint_report=$(cat eslint-report.json)
+
         # Count total issues (errors + warnings)
         total_issues=$(jq '[.[] | .messages | length] | add' <<< "$eslint_report")
-        # Count errors (can be adjusted to also count warnings if needed)
+        
+        # Count errors (severity 2 indicates errors)
         error_issues=$(jq '[.[] | .messages | map(select(.severity == 2)) | length] | add' <<< "$eslint_report")
 
-        # Calculate the quality percentage
+        # Calculate the quality percentage (100% minus the ratio of errors to total issues)
         if [ "$total_issues" -eq 0 ]; then
           quality_percentage=100
         else
           quality_percentage=$((100 - (error_issues * 100 / total_issues)))
         fi
 
-        echo "Total issues: $total_issues"
-        echo "Error issues: $error_issues"
-        echo "Quality Percentage: $quality_percentage%"
+        # Add the quality percentage to the ESLint report JSON
+        jq ". + {\"quality_percentage\": $quality_percentage}" eslint-report.json > eslint-report-with-quality.json
 
+        # Replace the original ESLint report with the updated one
+        mv eslint-report-with-quality.json eslint-report.json
+
+        # Save the quality percentage to GitHub Actions environment variable
         echo "quality_percentage=$quality_percentage" >> $GITHUB_ENV
 
-    - name: Upload ESLint Report and Quality Percentage
+    - name: Upload ESLint Report with Quality Percentage
       uses: actions/upload-artifact@v3
       with:
         name: eslint-report
         path: eslint-report.json
 
-    - name: Show Quality Percentage
-      run: echo "Code Quality Percentage: ${{ env.quality_percentage }}%"
+
