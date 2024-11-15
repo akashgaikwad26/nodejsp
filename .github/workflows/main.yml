@@ -1,0 +1,62 @@
+name: Javascript Code Quality Report
+
+on:
+  push:
+    paths:
+      - '**/*.js' # Trigger only on .js file changes
+  pull_request:
+    paths:
+      - '**/*.js' # Trigger only on .js file changes
+
+jobs:
+  lint:
+    name: Run ESLint and Calculate Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16' # Specify Node.js version
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run ESLint
+      id: eslint
+      run: |
+        npx eslint '**/*.js' --format json > eslint-report.json
+        echo "eslint_report=$(cat eslint-report.json)" >> $GITHUB_ENV
+
+    - name: Calculate Code Quality Percentage
+      id: quality
+      run: |
+        # Count total issues (errors + warnings)
+        total_issues=$(jq '[.[] | .messages | length] | add' <<< "$eslint_report")
+        # Count errors (can be adjusted to also count warnings if needed)
+        error_issues=$(jq '[.[] | .messages | map(select(.severity == 2)) | length] | add' <<< "$eslint_report")
+
+        # Calculate the quality percentage
+        if [ "$total_issues" -eq 0 ]; then
+          quality_percentage=100
+        else
+          quality_percentage=$((100 - (error_issues * 100 / total_issues)))
+        fi
+
+        echo "Total issues: $total_issues"
+        echo "Error issues: $error_issues"
+        echo "Quality Percentage: $quality_percentage%"
+
+        echo "quality_percentage=$quality_percentage" >> $GITHUB_ENV
+
+    - name: Upload ESLint Report and Quality Percentage
+      uses: actions/upload-artifact@v3
+      with:
+        name: eslint-report
+        path: eslint-report.json
+
+    - name: Show Quality Percentage
+      run: echo "Code Quality Percentage: ${{ env.quality_percentage }}%"
