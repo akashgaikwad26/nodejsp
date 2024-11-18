@@ -1,4 +1,4 @@
-name: Python Coverage Workflow
+name: Code Coverage(Python)
 
 on:
   push:
