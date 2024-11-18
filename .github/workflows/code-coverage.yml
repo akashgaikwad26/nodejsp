@@ -1,4 +1,4 @@
-name: Code Coverage for Javascript
+name: Code Coverage (Javascript)
 
 on:
   push:
