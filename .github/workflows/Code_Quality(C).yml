@@ -1,4 +1,4 @@
-name: Code Quality (C) Report
+name: Code Quality (C)
 
 on:
   push:
@@ -14,32 +14,23 @@ on:
 
 jobs:
   lint:
-    name: Analyze C Codebase with Cppcheck
+    name: Lint C Codebase
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Cppcheck and xsltproc
+      - name: Install Cppcheck
         run: |
           sudo apt-get update
-          sudo apt-get install -y cppcheck xsltproc
-
-      - name: Download Cppcheck HTML XSL stylesheet
-        run: |
-          wget https://raw.githubusercontent.com/danmar/cppcheck/main/htmlreport/cppcheck-html.xsl -O cppcheck-html.xsl
-
-      - name: Run Cppcheck and Generate XML Report
+          sudo apt-get install -y cppcheck
+      - name: Run Cppcheck
         run: |
           cppcheck --enable=all --inconclusive --xml . 2> cppcheck-report.xml || true
-        continue-on-error: true
+        continue-on-error: true  # Allows workflow to continue even if linting finds issues
 
-      - name: Convert XML to HTML Report
-        run: |
-          xsltproc cppcheck-html.xsl cppcheck-report.xml > cppcheck-report.html
-
-      - name: Upload Cppcheck HTML Report to GitHub Artifacts
+      - name: Upload Cppcheck Report
         uses: actions/upload-artifact@v3
         with:
-          name: cppcheck-html-report
-          path: cppcheck-report.html
+          name: cppcheck-report
+          path: cppcheck-report.xml
