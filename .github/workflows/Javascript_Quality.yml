@@ -1,4 +1,4 @@
-name: ESLint Code Quality Report
+name: Code Quality (JaVAscript)
 
 on:
   push:
