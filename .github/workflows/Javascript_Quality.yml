@@ -3,10 +3,10 @@ name: ESLint Code Quality Report
 on:
   push:
     paths:
-      - '**/*.js'
+      - '**/*.js' # Trigger only on .js file changes
   pull_request:
     paths:
-      - '**/*.js'
+      - '**/*.js' # Trigger only on .js file changes
   workflow_dispatch:
 
 jobs:
@@ -21,10 +21,23 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'
+        node-version: '18' # Node.js version 18 ensures compatibility with structuredClone
 
     - name: Install Dependencies
-      run: npm install
+      run: |
+        # Initialize npm if no package.json exists
+        if [ ! -f package.json ]; then
+          npm init -y
+        fi
+
+        # Install ESLint and eslint-html-reporter
+        npm install eslint eslint-html-reporter --save-dev
+
+    - name: Validate Installed Packages
+      run: |
+        npm list eslint eslint-html-reporter || echo "Dependencies are not installed correctly."
+        npx eslint --version || echo "ESLint is not available."
+        npx eslint-html-reporter || echo "HTML Reporter is not available."
 
     - name: Run ESLint and Generate HTML Report
       run: |
