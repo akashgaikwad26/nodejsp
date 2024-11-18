@@ -25,11 +25,18 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        # Install ESLint and eslint-formatter-html as development dependencies
         npm install eslint eslint-formatter-html --save-dev
+
+        # Create a lint script in package.json if it doesn't exist
+        if ! grep -q '"lint":' package.json; then
+          jq '.scripts += {"lint": "eslint \"**/*.js\""}' package.json > temp.json && mv temp.json package.json
+        fi
 
     - name: Run ESLint and Generate HTML Report
       run: |
-        npx eslint '**/*.js' -f html -o eslint-report.html || {
+        # Run ESLint using the "lint" script and output to an HTML file
+        npm run lint -- --format html --output-file eslint-report.html || {
           echo "ESLint failed. Printing debug info...";
           exit 1;
         }
