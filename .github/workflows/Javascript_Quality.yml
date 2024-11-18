@@ -7,12 +7,11 @@ on:
   pull_request:
     paths:
       - '**/*.js' # Trigger only on .js file changes
-
   workflow_dispatch:
 
 jobs:
   lint:
-    name: Run ESLint and Add Quality Percentage
+    name: Run ESLint and Generate HTML Report
     runs-on: ubuntu-latest
 
     steps:
@@ -27,44 +26,20 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    - name: Run ESLint
+    - name: Install ESLint HTML Reporter
+      run: npm install eslint-html-reporter --save-dev
+
+    - name: Run ESLint and Generate HTML Report
       id: eslint
       run: |
-        npx eslint '**/*.js' --format json > eslint-report.json
-        echo "eslint_report=$(cat eslint-report.json)" >> $GITHUB_ENV
-
-    - name: Calculate and Add Code Quality Percentage
-      id: quality
-      run: |
-        # Read the ESLint report
-        eslint_report=$(cat eslint-report.json)
-
-        # Count total issues (errors + warnings)
-        total_issues=$(jq '[.[] | .messages | length] | add' <<< "$eslint_report")
+        # Run ESLint and output results to JSON
+        npx eslint '**/*.js' -f json > eslint-report.json
         
-        # Count errors (severity 2 indicates errors)
-        error_issues=$(jq '[.[] | .messages | map(select(.severity == 2)) | length] | add' <<< "$eslint_report")
+        # Convert JSON to HTML using the ESLint HTML Reporter
+        npx eslint-html-reporter -o eslint-report.html -f eslint-report.json
 
-        # Calculate the quality percentage (100% minus the ratio of errors to total issues)
-        if [ "$total_issues" -eq 0 ]; then
-          quality_percentage=100
-        else
-          quality_percentage=$((100 - (error_issues * 100 / total_issues)))
-        fi
-
-        # Add the quality percentage to the ESLint report JSON
-        jq ". + {\"quality_percentage\": $quality_percentage}" eslint-report.json > eslint-report-with-quality.json
-
-        # Replace the original ESLint report with the updated one
-        mv eslint-report-with-quality.json eslint-report.json
-
-        # Save the quality percentage to GitHub Actions environment variable
-        echo "quality_percentage=$quality_percentage" >> $GITHUB_ENV
-
-    - name: Upload ESLint Report with Quality Percentage
+    - name: Upload ESLint HTML Report
       uses: actions/upload-artifact@v3
       with:
-        name: eslint-report
-        path: eslint-report.json
-
-
+        name: eslint-html-report
+        path: eslint-report.html
