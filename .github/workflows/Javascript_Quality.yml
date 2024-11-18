@@ -3,10 +3,10 @@ name: ESLint Code Quality Report
 on:
   push:
     paths:
-      - '**/*.js' # Trigger only on .js file changes
+      - '**/*.js'
   pull_request:
     paths:
-      - '**/*.js' # Trigger only on .js file changes
+      - '**/*.js'
   workflow_dispatch:
 
 jobs:
@@ -21,34 +21,18 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18' # Node.js version 18 ensures compatibility with structuredClone
+        node-version: '18'
 
     - name: Install Dependencies
       run: |
-        # Initialize npm if no package.json exists
-        if [ ! -f package.json ]; then
-          npm init -y
-        fi
-
-        # Install ESLint and eslint-html-reporter
-        npm install eslint eslint-html-reporter --save-dev
-
-    - name: Validate Installed Packages
-      run: |
-        npm list eslint eslint-html-reporter || echo "Dependencies are not installed correctly."
-        npx eslint --version || echo "ESLint is not available."
-        npx eslint-html-reporter || echo "HTML Reporter is not available."
+        npm install eslint eslint-formatter-html --save-dev
 
     - name: Run ESLint and Generate HTML Report
       run: |
-        # Run ESLint and output results to JSON
-        npx eslint '**/*.js' -f json > eslint-report.json || {
+        npx eslint '**/*.js' -f html -o eslint-report.html || {
           echo "ESLint failed. Printing debug info...";
           exit 1;
         }
-
-        # Convert JSON to HTML using eslint-html-reporter
-        npx eslint-html-reporter -o eslint-report.html -f eslint-report.json
 
     - name: Upload ESLint HTML Report
       uses: actions/upload-artifact@v3
