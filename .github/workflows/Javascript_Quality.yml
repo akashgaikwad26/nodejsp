@@ -21,18 +21,16 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18' # Ensure structuredClone is supported
+        node-version: '18'
 
     - name: Install Dependencies
       run: npm install
 
     - name: Run ESLint and Generate HTML Report
-      id: eslint
       run: |
         # Run ESLint and output results to JSON
         npx eslint '**/*.js' -f json > eslint-report.json || {
           echo "ESLint failed. Printing debug info...";
-          cat eslint-report.json || echo "No ESLint report generated.";
           exit 1;
         }
 
