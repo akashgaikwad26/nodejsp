@@ -3,10 +3,10 @@ name: ESLint Code Quality Report
 on:
   push:
     paths:
-      - '**/*.js' # Trigger only on .js file changes
+      - '**/*.js'
   pull_request:
     paths:
-      - '**/*.js' # Trigger only on .js file changes
+      - '**/*.js'
   workflow_dispatch:
 
 jobs:
@@ -21,21 +21,22 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16' # Specify Node.js version
+        node-version: '18' # Ensure structuredClone is supported
 
     - name: Install Dependencies
       run: npm install
-
-    - name: Install ESLint HTML Reporter
-      run: npm install eslint-html-reporter --save-dev
 
     - name: Run ESLint and Generate HTML Report
       id: eslint
       run: |
         # Run ESLint and output results to JSON
-        npx eslint '**/*.js' -f json > eslint-report.json
-        
-        # Convert JSON to HTML using the ESLint HTML Reporter
+        npx eslint '**/*.js' -f json > eslint-report.json || {
+          echo "ESLint failed. Printing debug info...";
+          cat eslint-report.json || echo "No ESLint report generated.";
+          exit 1;
+        }
+
+        # Convert JSON to HTML using eslint-html-reporter
         npx eslint-html-reporter -o eslint-report.html -f eslint-report.json
 
     - name: Upload ESLint HTML Report
