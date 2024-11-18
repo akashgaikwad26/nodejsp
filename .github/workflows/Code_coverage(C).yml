@@ -1,4 +1,4 @@
-name: Code Coverage for C Code
+name: Code Coverage (C)
 
 on:
   push:
